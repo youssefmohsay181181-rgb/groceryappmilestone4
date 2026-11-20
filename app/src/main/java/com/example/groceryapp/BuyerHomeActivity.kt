@@ -1,6 +1,9 @@
 package com.example.groceryapp
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -12,6 +15,7 @@ import com.example.groceryapp.databinding.ActivityBuyerHomeBinding
  *
  *  - Shops tab   -> [ShopsFragment] (grid of shops); tapping a shop opens [ProductsFragment] on top of it
  *  - Cart tab    -> [CartFragment]
+ *  - Orders tab  -> [MyOrdersFragment] (cancel with dialog + undo Snackbar)
  *  - Profile tab -> opens [ProfileActivity]
  */
 class BuyerHomeActivity : AppCompatActivity() {
@@ -27,6 +31,7 @@ class BuyerHomeActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_shops -> { showRoot(ShopsFragment()); true }
                 R.id.nav_cart -> { showRoot(CartFragment()); true }
+                R.id.nav_orders -> { showRoot(MyOrdersFragment()); true }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     false // keep the previous tab highlighted
@@ -44,6 +49,13 @@ class BuyerHomeActivity : AppCompatActivity() {
         // "Shops" is already the selected tab, so selecting it again would not fire the listener:
         // show the first screen directly.
         if (savedInstanceState == null) showRoot(ShopsFragment())
+
+        // Android 13+: ask once so the "Order is on the way" notification can be shown.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
     }
 
     /** Replaces the current screen with a top-level tab fragment. */

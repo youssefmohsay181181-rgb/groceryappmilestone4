@@ -31,6 +31,7 @@ class ProfileActivity : AppCompatActivity() {
     /** A photo the user picked but hasn't saved yet; uploaded to S3 when they tap "Save changes". */
     private var pendingPhoto: Uri? = null
     private var shownPhotoUrl: String? = null
+    private var role: String = Roles.BUYER
 
     private val pickPhoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
@@ -46,6 +47,7 @@ class ProfileActivity : AppCompatActivity() {
             val name = snapshot.child("name").value?.toString() ?: ""
             val address = snapshot.child("address").value?.toString() ?: ""
             val phone = snapshot.child("phone").value?.toString() ?: ""
+            role = snapshot.child("role").value?.toString() ?: Roles.BUYER
 
             binding.etName.setIfIdle(name)
             binding.etAddress.setIfIdle(address)
@@ -93,6 +95,10 @@ class ProfileActivity : AppCompatActivity() {
             goToLogin()
         }
         binding.btnDelete.setOnClickListener { confirmDelete() }
+        // VoIP: buyer talks, seller listens (see VoipActivity).
+        binding.btnVoiceCall.setOnClickListener {
+            startActivity(Intent(this, VoipActivity::class.java).putExtra(Roles.EXTRA_ROLE, role))
+        }
     }
 
     private fun saveProfile() {

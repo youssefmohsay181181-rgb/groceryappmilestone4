@@ -30,5 +30,6 @@ data class Order(
         const val STATUS_PENDING = "pending"
         const val STATUS_ACCEPTED = "accepted"
         const val STATUS_REJECTED = "rejected"
+        const val STATUS_CANCELLED = "cancelled"
     }
 }

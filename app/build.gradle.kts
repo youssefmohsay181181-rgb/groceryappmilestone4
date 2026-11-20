@@ -65,5 +65,6 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.fragment:fragment-ktx:1.8.5") // Fragments + registerForActivityResult in fragments
     implementation("com.amazonaws:aws-android-sdk-s3:2.77.0") // AWS S3 (profile + product photos)
+    implementation("androidx.work:work-runtime-ktx:2.9.1") // delayed "Order is on the way" notification
 
 }

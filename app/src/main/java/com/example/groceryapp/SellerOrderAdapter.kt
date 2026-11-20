@@ -3,6 +3,7 @@ package com.example.groceryapp
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.groceryapp.databinding.ItemOrderBinding
@@ -33,7 +34,6 @@ class SellerOrderAdapter(
     override fun onBindViewHolder(holder: VH, position: Int) {
         val order = items[position]
         val b = holder.binding
-        val ctx = b.root.context
 
         b.tvBuyer.text = order.buyerName.ifBlank { "Customer" }
         b.tvTime.text = timeFormat.format(Date(order.timestamp))
@@ -42,23 +42,7 @@ class SellerOrderAdapter(
                 if (order.deliveryFee <= 0.0) "free" else formatMoney(order.deliveryFee)
         b.tvTotal.text = formatMoney(order.total)
 
-        when (order.status) {
-            Order.STATUS_ACCEPTED -> {
-                b.tvStatus.text = "Accepted"
-                b.tvStatus.setTextColor(ContextCompat.getColor(ctx, R.color.green_primary))
-                b.tvStatus.setBackgroundResource(R.drawable.badge_in_stock)
-            }
-            Order.STATUS_REJECTED -> {
-                b.tvStatus.text = "Rejected"
-                b.tvStatus.setTextColor(ContextCompat.getColor(ctx, R.color.danger))
-                b.tvStatus.setBackgroundResource(R.drawable.badge_out_of_stock)
-            }
-            else -> {
-                b.tvStatus.text = "Waiting for approval"
-                b.tvStatus.setTextColor(0xFFE65100.toInt())
-                b.tvStatus.setBackgroundResource(R.drawable.badge_pending)
-            }
-        }
+        bindOrderStatus(b.tvStatus, order.status)
 
         val pending = order.status == Order.STATUS_PENDING
         b.actionRow.visibility = if (pending) View.VISIBLE else View.GONE
@@ -67,4 +51,26 @@ class SellerOrderAdapter(
     }
 
     override fun getItemCount() = items.size
+}
+
+/** Shows an order status as a coloured badge (shared by the seller and buyer order lists). */
+fun bindOrderStatus(tv: TextView, status: String) {
+    val ctx = tv.context
+    when (status) {
+        Order.STATUS_ACCEPTED -> {
+            tv.text = "Accepted"
+            tv.setTextColor(ContextCompat.getColor(ctx, R.color.green_primary))
+            tv.setBackgroundResource(R.drawable.badge_in_stock)
+        }
+        Order.STATUS_REJECTED, Order.STATUS_CANCELLED -> {
+            tv.text = if (status == Order.STATUS_REJECTED) "Rejected" else "Cancelled"
+            tv.setTextColor(ContextCompat.getColor(ctx, R.color.danger))
+            tv.setBackgroundResource(R.drawable.badge_out_of_stock)
+        }
+        else -> {
+            tv.text = "Waiting for approval"
+            tv.setTextColor(0xFFE65100.toInt())
+            tv.setBackgroundResource(R.drawable.badge_pending)
+        }
+    }
 }

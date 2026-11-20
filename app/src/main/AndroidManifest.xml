@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- "Order is on the way" notification (Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- VoIP: the buyer records the microphone and sends it over UDP. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- Lets the product screen check for / launch a camera app (photos are taken with the system camera,
          so no CAMERA permission is needed). -->
@@ -31,6 +35,7 @@
         <activity android:name=".BuyerHomeActivity" android:exported="false" />
         <activity android:name=".SellerHomeActivity" android:exported="false" />
         <activity android:name=".ShopSettingsActivity" android:exported="false" />
+        <activity android:name=".VoipActivity" android:exported="false" />
 
         <!-- Shares the temporary camera picture with the system camera app. -->
         <provider

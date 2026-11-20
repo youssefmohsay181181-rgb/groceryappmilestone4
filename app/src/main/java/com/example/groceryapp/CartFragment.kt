@@ -96,7 +96,8 @@ class CartFragment : Fragment() {
             )
             // Reserves the stock first, then saves the order for the seller (see OrderRepository).
             OrderRepository.placeOrder(order) { result ->
-                result.onSuccess {
+                result.onSuccess { orderId ->
+                    OrderNotifier.scheduleOnTheWay(ctx, orderId) // "Order is on the way" in 30 s
                     CartManager.clear()
                     if (!isAdded) return@onSuccess
                     render()
