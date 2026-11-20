@@ -18,6 +18,10 @@ object OrderRepository {
 
     private val db get() = FirebaseDatabase.getInstance()
 
+    /** Firebase's error from the last failed status change (e.g. "Permission denied"), or null. */
+    var lastStatusError: String? = null
+        private set
+
     /** Adds [delta] (may be negative) to products/{id}/quantity; does nothing if the product no longer exists. */
     private fun adjustStock(productId: String, delta: Int) {
         db.getReference("products").child(productId).child("quantity")
@@ -141,6 +145,7 @@ object OrderRepository {
 
                 override fun onComplete(error: DatabaseError?, committed: Boolean, snapshot: DataSnapshot?) {
                     val changed = error == null && committed && snapshot?.getValue(String::class.java) == newStatus
+                    lastStatusError = error?.message
                     if (changed && (newStatus == Order.STATUS_REJECTED || newStatus == Order.STATUS_CANCELLED)) {
                         releaseStock(order)
                     }

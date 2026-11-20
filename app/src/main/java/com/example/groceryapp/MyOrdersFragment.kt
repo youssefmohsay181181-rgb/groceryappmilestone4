@@ -77,7 +77,8 @@ class MyOrdersFragment : Fragment() {
         val ctx = requireContext().applicationContext
         OrderRepository.cancel(order) { changed ->
             if (!changed) {
-                toast("This order was already handled by the seller")
+                val error = OrderRepository.lastStatusError
+                toast(if (error != null) "Couldn't cancel: $error" else "This order was already handled by the seller")
                 return@cancel
             }
             OrderNotifier.cancelOnTheWay(ctx, order.id) // no "on the way" for a cancelled order
