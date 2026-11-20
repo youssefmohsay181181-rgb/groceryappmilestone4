@@ -16,7 +16,7 @@ import java.net.InetAddress
 
 /**
  * Simple one-way VoIP over UDP (static IP and port from [VoipConfig]).
- *  - Buyer  -> "Start talking": microphone -> UDP packets to PC_IP:PORT
+ *  - Buyer  -> "Start talking": microphone -> UDP packets to LISTENER_IP:PORT
  *  - Seller -> "Start listening": UDP packets on PORT -> speaker (AudioTrack)
  */
 class VoipActivity : AppCompatActivity() {
@@ -35,7 +35,7 @@ class VoipActivity : AppCompatActivity() {
 
         isBuyer = intent.getStringExtra(Roles.EXTRA_ROLE) != Roles.SELLER
         binding.tvVoipInfo.text = if (isBuyer)
-            "Talking to ${VoipConfig.PC_IP} on UDP port ${VoipConfig.PORT}"
+            "Talking to ${VoipConfig.LISTENER_IP} on UDP port ${VoipConfig.PORT}"
         else
             "Listening on UDP port ${VoipConfig.PORT}"
         binding.btnBack.setOnClickListener { finish() }
@@ -92,7 +92,7 @@ class VoipActivity : AppCompatActivity() {
         )
         val sock = DatagramSocket().also { socket = it }
         try {
-            val target = InetAddress.getByName(VoipConfig.PC_IP)
+            val target = InetAddress.getByName(VoipConfig.LISTENER_IP)
             val buffer = ByteArray(VoipConfig.PACKET_BYTES)
             recorder.startRecording()
             while (running) {
