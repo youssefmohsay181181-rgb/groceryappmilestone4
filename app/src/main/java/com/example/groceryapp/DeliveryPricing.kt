@@ -37,7 +37,7 @@ object DeliveryPricing {
     const val FEE_PER_KM = 4.0
 
     /** Shops don't deliver further than this; the buyer can still choose pickup. */
-    const val MAX_DELIVERY_KM = 15.0
+    const val MAX_DELIVERY_KM = 30.0
 
     /** Extra fee during rush hours, when fewer drivers are available. */
     const val RUSH_HOUR_FEE = 5.0

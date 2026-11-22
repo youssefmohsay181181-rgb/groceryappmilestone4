@@ -54,7 +54,7 @@
           ".validate": "newData.isString() && (newData.parent().child('deliveryMethod').val() === 'pickup' || newData.val().length >= 10)"
         },
         "distanceKm": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 15"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
         },
         "items": {
           "$productId": {
