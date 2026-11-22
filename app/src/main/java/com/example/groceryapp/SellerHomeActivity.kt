@@ -56,7 +56,7 @@ class SellerHomeActivity : AppCompatActivity() {
                 R.id.nav_add -> { showRoot(AddEditProductFragment.newInstance(null)); true }
                 R.id.nav_orders -> { showRoot(SellerOrdersFragment()); true }
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java).putExtra(Roles.EXTRA_ROLE, Roles.SELLER))
                     false // keep the previous tab highlighted
                 }
                 else -> false

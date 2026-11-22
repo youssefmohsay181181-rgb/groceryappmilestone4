@@ -47,7 +47,7 @@ class ProfileActivity : AppCompatActivity() {
             val name = snapshot.child("name").value?.toString() ?: ""
             val address = snapshot.child("address").value?.toString() ?: ""
             val phone = snapshot.child("phone").value?.toString() ?: ""
-            role = snapshot.child("role").value?.toString() ?: Roles.BUYER
+            snapshot.child("role").value?.toString()?.let { role = it }
 
             binding.etName.setIfIdle(name)
             binding.etAddress.setIfIdle(address)
@@ -69,6 +69,8 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // Role from the home screen that opened us, so Voice call works even with no internet.
+        intent.getStringExtra(Roles.EXTRA_ROLE)?.let { role = it }
 
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {           // not signed in -> back to login
