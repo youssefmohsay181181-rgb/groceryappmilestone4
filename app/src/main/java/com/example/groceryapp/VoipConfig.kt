@@ -1,16 +1,27 @@
 package com.example.groceryapp
 
 /**
- * Static VoIP settings (hard-coded on purpose, no signalling).
+ * Settings for the SIP/RTP voice call ([VoipActivity]).
  *
- * Buyer (tablet) records the microphone and sends raw PCM audio over UDP to LISTENER_IP:PORT.
- * The seller's phone (LISTENER_IP) receives it on PORT and plays it with AudioTrack.
- * Both devices must be on the same Wi-Fi.
+ * The other phone's IP and both SIP ports are typed by the user on the call screen;
+ * the values here are only defaults and fixed audio parameters.
  */
 object VoipConfig {
-    const val LISTENER_IP = "192.168.1.170" // seller's phone that listens (Wi-Fi IPv4)
-    const val PORT = 50005                  // UDP port
+    /** Standard SIP port. Wireshark decodes UDP 5060 as SIP automatically. */
+    const val DEFAULT_SIP_PORT = 5060
 
-    const val SAMPLE_RATE = 16000           // 16 kHz, mono, 16-bit PCM
-    const val PACKET_BYTES = 640            // 20 ms of audio per UDP packet
+    /** Preferred local RTP (voice) port; if it's busy a free port is used. Announced to the other side in SDP. */
+    const val PREFERRED_RTP_PORT = 40000
+
+    /** G.711 µ-law (PCMU) — RTP payload type 0, 8 kHz mono. Wireshark can decode and play it. */
+    const val RTP_PAYLOAD_PCMU = 0
+    const val SAMPLE_RATE = 8000
+    const val PACKET_MS = 20
+    const val SAMPLES_PER_PACKET = SAMPLE_RATE * PACKET_MS / 1000 // 160 samples = 160 µ-law bytes
+
+    /** Give up on an unanswered INVITE after this long (then CANCEL it). */
+    const val INVITE_TIMEOUT_MS = 30_000L
+
+    const val MIN_PORT = 1024        // ports below 1024 are reserved by the system
+    const val MAX_PORT = 65535
 }

@@ -9,7 +9,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** One card per buyer order: shop, time, items, total, status and (while pending) a Cancel button. */
+/**
+ * One card per buyer order: shop, time, items, delivery/pickup details, total, the current status
+ * (Waiting → Preparing → Ready for pickup / Delivering → Delivered) and, while the seller hasn't
+ * accepted it yet, a "Cancel order" button. Reuses item_order.xml from the seller list.
+ */
 class BuyerOrderAdapter(
     private val onCancel: (Order) -> Unit
 ) : RecyclerView.Adapter<BuyerOrderAdapter.VH>() {
@@ -17,6 +21,7 @@ class BuyerOrderAdapter(
     private val items = mutableListOf<Order>()
     private val timeFormat = SimpleDateFormat("d MMM, h:mm a", Locale.getDefault())
 
+    /** Replaces the list (called on every Firebase update). */
     fun submitList(newItems: List<Order>) {
         items.clear()
         items.addAll(newItems)
@@ -35,8 +40,8 @@ class BuyerOrderAdapter(
         b.tvBuyer.text = order.shopName.ifBlank { "Shop" }
         b.tvTime.text = timeFormat.format(Date(order.timestamp))
         b.tvItems.text = order.items.values.joinToString("\n") { "${it.quantity} × ${it.name}" }
-        b.tvFee.text = "Subtotal ${formatMoney(order.subtotal)} · Delivery " +
-                if (order.deliveryFee <= 0.0) "free" else formatMoney(order.deliveryFee)
+        bindDeliveryInfo(b.tvDelivery, order) // pickup, or delivery address + measured distance
+        b.tvFee.text = feeLine(order)
         b.tvTotal.text = formatMoney(order.total)
         bindOrderStatus(b.tvStatus, order.status)
 

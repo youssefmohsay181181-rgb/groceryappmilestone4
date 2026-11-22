@@ -73,15 +73,14 @@ class MyOrdersFragment : Fragment() {
             .show()
     }
 
+    /** Cancels via a transaction (fails if the seller already accepted it); items go back to stock. */
     private fun cancelOrder(order: Order) {
-        val ctx = requireContext().applicationContext
         OrderRepository.cancel(order) { changed ->
             if (!changed) {
                 val error = OrderRepository.lastStatusError
                 toast(if (error != null) "Couldn't cancel: $error" else "This order was already handled by the seller")
                 return@cancel
             }
-            OrderNotifier.cancelOnTheWay(ctx, order.id) // no "on the way" for a cancelled order
             showUndoSnackbar(order)
         }
     }
@@ -89,13 +88,11 @@ class MyOrdersFragment : Fragment() {
     /** Snackbar: "Order is cancelled" with UNDO, which puts the order back. */
     private fun showUndoSnackbar(order: Order) {
         val root = view ?: return
-        val ctx = requireContext().applicationContext
         Snackbar.make(root, "Order is cancelled", Snackbar.LENGTH_LONG)
             .setAnchorView(requireActivity().findViewById(R.id.bottomNav))
             .setAction("UNDO") {
                 OrderRepository.undoCancel(order) { restored ->
                     if (restored) {
-                        OrderNotifier.scheduleOnTheWay(ctx, order.id)
                         toast("Order restored")
                     } else {
                         toast("Couldn't restore the order (items may be out of stock)")
