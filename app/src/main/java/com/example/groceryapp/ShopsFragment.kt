@@ -65,7 +65,7 @@ class ShopsFragment : Fragment() {
         binding.rvShops.adapter = adapter
 
         binding.ivProfileIcon.setOnClickListener {
-            startActivity(android.content.Intent(requireContext(), ProfileActivity::class.java))
+            startActivity(android.content.Intent(requireContext(), ProfileActivity::class.java).putExtra(Roles.EXTRA_ROLE, Roles.BUYER))
         }
         binding.ivCart.setOnClickListener {
             (requireActivity() as BuyerHomeActivity).selectTab(R.id.nav_cart)

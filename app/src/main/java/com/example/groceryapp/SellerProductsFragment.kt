@@ -74,7 +74,7 @@ class SellerProductsFragment : Fragment() {
         binding.rvProducts.adapter = adapter
 
         binding.ivProfileIcon.setOnClickListener {
-            startActivity(Intent(requireContext(), ProfileActivity::class.java))
+            startActivity(Intent(requireContext(), ProfileActivity::class.java).putExtra(Roles.EXTRA_ROLE, Roles.SELLER))
         }
         binding.cardShopInfo.setOnClickListener {
             startActivity(Intent(requireContext(), ShopSettingsActivity::class.java))

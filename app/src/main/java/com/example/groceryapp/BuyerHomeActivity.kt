@@ -33,7 +33,7 @@ class BuyerHomeActivity : AppCompatActivity() {
                 R.id.nav_cart -> { showRoot(CartFragment()); true }
                 R.id.nav_orders -> { showRoot(MyOrdersFragment()); true }
                 R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
+                    startActivity(Intent(this, ProfileActivity::class.java).putExtra(Roles.EXTRA_ROLE, Roles.BUYER))
                     false // keep the previous tab highlighted
                 }
                 else -> false
