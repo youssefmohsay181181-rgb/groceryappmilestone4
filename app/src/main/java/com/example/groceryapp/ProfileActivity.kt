@@ -23,6 +23,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
+/**
+ * Profile screen shared by buyers and sellers: edit name, address and phone, change the profile
+ * photo (uploaded to S3, URL saved in users/{uid}/photoUrl), open the VoIP call screen, log out,
+ * or delete the account.
+ */
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
@@ -95,12 +100,13 @@ class ProfileActivity : AppCompatActivity() {
             goToLogin()
         }
         binding.btnDelete.setOnClickListener { confirmDelete() }
-        // VoIP: buyer talks, seller listens (see VoipActivity).
+        // VoIP: opens the call screen, where the user enters the other phone's IP and port (see VoipActivity).
         binding.btnVoiceCall.setOnClickListener {
             startActivity(Intent(this, VoipActivity::class.java).putExtra(Roles.EXTRA_ROLE, role))
         }
     }
 
+    /** Validates the fields; uploads the new photo to S3 first if one was picked, then saves. */
     private fun saveProfile() {
         val name = binding.etName.text.toString().trim()
         if (name.isEmpty()) {
@@ -139,6 +145,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    /** Writes the changed fields to users/{uid}. */
     private fun commitProfile(updates: Map<String, Any>) {
         userRef.updateChildren(updates)
             .addOnSuccessListener {
@@ -152,6 +159,7 @@ class ProfileActivity : AppCompatActivity() {
 
     // ---- Profile photo --------------------------------------------------------------------
 
+    /** Downloads the profile photo from S3 and shows it. */
     private fun loadPhoto(url: String) {
         binding.progressPhoto.visibility = View.VISIBLE
         S3Helper.downloadImage(url) { result ->
@@ -162,12 +170,14 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    /** Shows [bitmap] in the round avatar. */
     private fun showPhoto(bitmap: Bitmap) {
         binding.ivPhoto.setPadding(0, 0, 0, 0)
         binding.ivPhoto.imageTintList = null
         binding.ivPhoto.setImageBitmap(bitmap)
     }
 
+    /** Shows the default person icon (no photo yet). */
     private fun showPlaceholder() {
         val pad = (26 * resources.displayMetrics.density).toInt()
         binding.ivPhoto.setPadding(pad, pad, pad, pad)
@@ -175,6 +185,7 @@ class ProfileActivity : AppCompatActivity() {
         binding.ivPhoto.setImageResource(R.drawable.ic_person)
     }
 
+    /** Shows/hides the spinner over the avatar while a photo loads or uploads. */
     private fun setPhotoBusy(busy: Boolean) {
         binding.progressPhoto.visibility = if (busy) View.VISIBLE else View.GONE
         binding.btnSave.isEnabled = !busy
@@ -183,6 +194,7 @@ class ProfileActivity : AppCompatActivity() {
 
     // ---- Delete account -------------------------------------------------------------------
 
+    /** Alert dialog asking for the password before deleting the account. */
     private fun confirmDelete() {
         val dialogBinding = DialogConfirmPasswordBinding.inflate(layoutInflater)
         dialogBinding.tilPassword.clearErrorOnType()
@@ -278,11 +290,13 @@ class ProfileActivity : AppCompatActivity() {
             })
     }
 
+    /** Shows why the account could not be deleted. */
     private fun failDelete(message: String) {
         setBusy(false)
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
+    /** Disables the buttons while a save/delete is running. */
     private fun setBusy(busy: Boolean) {
         binding.btnSave.isEnabled = !busy
         binding.btnLogout.isEnabled = !busy
@@ -297,6 +311,7 @@ class ProfileActivity : AppCompatActivity() {
         if (!hasFocus() && text.toString() != value) setText(value)
     }
 
+    /** Returns to the role selection screen with a cleared back stack. */
     private fun goToLogin() {
         startActivity(
             Intent(this, RoleSelectionActivity::class.java)

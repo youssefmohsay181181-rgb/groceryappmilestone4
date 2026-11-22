@@ -13,6 +13,12 @@ import com.google.firebase.database.Transaction
  *   same last item), and only then writes the order. If anything fails, the reserved stock is put back.
  * - [accept] / [reject] / [cancel] change the status with a transaction (only a still-pending order can change);
  *   rejecting or cancelling returns the items to stock. [undoCancel] takes the stock again.
+ * - [advance] moves an accepted order through Preparing → Ready for pickup / Delivering → Delivered.
+ *
+ * Server-side quantity check: the stock is changed inside Firebase transactions, which Firebase runs
+ * against the latest value on the server and retries if someone else changed it first. So even if
+ * two phones pass the client-side check at the same time, only one of them can take the last item.
+ * database.rules.json (project root) adds a second guard: quantity can never be saved below 0.
  */
 object OrderRepository {
 
@@ -122,7 +128,19 @@ object OrderRepository {
         }
     }
 
-    fun accept(order: Order, onResult: (Boolean) -> Unit) = changeStatus(order, Order.STATUS_ACCEPTED, onResult = onResult)
+    /** Seller accepts a pending order: it moves to "Preparing". */
+    fun accept(order: Order, onResult: (Boolean) -> Unit) = changeStatus(order, Order.STATUS_PREPARING, onResult = onResult)
+
+    /**
+     * Seller moves an accepted order one step forward:
+     * Preparing → Ready for pickup / Delivering → Delivered (see [Order.nextStatus]).
+     * The transaction only succeeds if the order is still in the status the seller saw,
+     * so tapping the button twice can't skip a step.
+     */
+    fun advance(order: Order, onResult: (Boolean) -> Unit) {
+        val next = order.nextStatus() ?: return onResult(false)
+        changeStatus(order, next, from = order.status, onResult = onResult)
+    }
 
     /** Rejects a pending order and puts its items back into stock. */
     fun reject(order: Order, onResult: (Boolean) -> Unit) = changeStatus(order, Order.STATUS_REJECTED, onResult = onResult)
